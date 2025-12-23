@@ -3,20 +3,19 @@ SHELL := /bin/zsh
 
 UNITY_APP_NAME=flutter_unity_widget_sample_unity
 
-.PHONY: build-runner watch codegen unity xcode update-icon
+.PHONY: build-runner watch codegen unity xcode update-icon run/development
 
 setup:
 	fvm use stable
-	flutter pub get
-	flutter pub global activate protoc_plugin
+	fvm flutter pub get
 	cd ios && pod install
 	cd unity/$(UNITY_APP_NAME) && make setup
 
 build-runner:
-	dart run build_runner build --delete-conflicting-outputs
+	fvm dart run build_runner build --delete-conflicting-outputs
 
 watch:
-	dart run build_runner watch --delete-conflicting-outputs
+	fvm dart run build_runner watch --delete-conflicting-outputs
 
 unity:
 	cd unity/$(UNITY_APP_NAME) && make unity
@@ -25,4 +24,7 @@ xcode:
 	open ./ios/Runner.xcworkspace &
 
 update-icon:
-	flutter pub run flutter_launcher_icons:main
+	fvm flutter pub run flutter_launcher_icons:main
+
+run/development:
+	fvm flutter run --flavor development
