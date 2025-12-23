@@ -9,7 +9,5 @@ import 'app.dart';
 void main() async {
   runZonedGuarded(() {
     runApp(const ProviderScope(child: App()));
-  }, (error, trace) {
-
-  });
+  }, (error, trace) {});
 }
