@@ -241,9 +241,11 @@ namespace FlutterUnityIntegration.Editor
 
 #if UNITY_ANDROID && UNITY_6000_0_OR_NEWER
             UnityEditor.Android.UserBuildSettings.DebugSymbols.level =
- isReleaseBuild ? Unity.Android.Types.DebugSymbolLevel.None : Unity.Android.Types.DebugSymbolLevel.SymbolTable;
+                isReleaseBuild
+                    ? Unity.Android.Types.DebugSymbolLevel.None
+                    : Unity.Android.Types.DebugSymbolLevel.SymbolTable;
             UnityEditor.Android.UserBuildSettings.DebugSymbols.format =
- Unity.Android.Types.DebugSymbolFormat.LegacyExtensions;
+                Unity.Android.Types.DebugSymbolFormat.LegacyExtensions;
 #endif
 #if UNITY_ANDROID && UNITY_2023_1_OR_NEWER
             PlayerSettings.Android.applicationEntry = AndroidApplicationEntry.Activity;
@@ -381,17 +383,39 @@ body { padding: 0; margin: 0; overflow: hidden; }
             // disable the Unity ndk path as it will conflict with Flutter.
             buildText = buildText.Replace("ndkPath \"", "// ndkPath \"");
 
+            // Unity 6000+: Replace getProperty() calls with helper functions that read from local.properties
+            buildText = buildText.Replace("getProperty(\"unity.androidNdkPath\")", "getUnityNdkPath()");
+            buildText = buildText.Replace("getProperty(\"unity.androidSdkPath\")", "getUnitySdkPath()");
+
+            // Add helper functions before getIl2CppOutputPath() if they don't exist
+            if (!buildText.Contains("def getUnityNdkPath()"))
+            {
+                var helperFunctions = @"def getUnityNdkPath() {
+    Properties local = new Properties()
+    local.load(new FileInputStream(""${rootDir}/local.properties""))
+    return local.getProperty('unity.androidNdkPath')
+}
+
+def getUnitySdkPath() {
+    Properties local = new Properties()
+    local.load(new FileInputStream(""${rootDir}/local.properties""))
+    return local.getProperty('unity.androidSdkPath')
+}
+
+";
+                // Insert before getIl2CppOutputPath() function
+                buildText = buildText.Replace("def getIl2CppOutputPath", helperFunctions + "def getIl2CppOutputPath");
+            }
+
             // Untiy 6000, handle ../shared/
             buildText = Regex.Replace(buildText, @"\.\./shared/", "./shared/");
 
 
             // check for namespace definition (Android gradle plugin 8+), add a backwards compatible version if it is missing.
             if (!buildText.Contains("namespace"))
-            {
                 buildText = buildText.Replace("compileOptions {",
                     "if (project.android.hasProperty(\"namespace\")) {\n        namespace 'com.unity3d.player'\n    }\n\n    compileOptions {"
                 );
-            }
 
             if (isPlugin)
             {
@@ -433,6 +457,7 @@ body { padding: 0; margin: 0; overflow: hidden; }
                 Debug.LogError("Android res/values/strings.xml file not found during export.");
             }
         }
+
 
         private static void BuildIOS(String path, bool isReleaseBuild)
         {
