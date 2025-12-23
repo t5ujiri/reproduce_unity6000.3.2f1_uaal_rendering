@@ -18,20 +18,6 @@ build-runner:
 watch:
 	dart run build_runner watch --delete-conflicting-outputs
 
-codegen:
-	rm -rf unity/$(UNITY_APP_NAME)/Assets/Scripts/Generated
-	rm -rf lib/gen/proto
-	mkdir -p unity/$(UNITY_APP_NAME)/Assets/Scripts/Generated
-	mkdir -p lib/gen/proto
-	protoc -I=proto \
-		--csharp_out=unity/$(UNITY_APP_NAME)/Assets/Scripts/Generated \
-		./proto/**/*.proto
-	protoc -I=proto \
-		--dart_out=lib/gen/proto \
- 		./proto/**/*.proto \
- 		google/protobuf/empty.proto \
- 		google/protobuf/timestamp.proto
-
 unity:
 	cd unity/$(UNITY_APP_NAME) && make unity
 

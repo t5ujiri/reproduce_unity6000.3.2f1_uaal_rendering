@@ -12,7 +12,7 @@ class App extends HookConsumerWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
       ),
-      home: CounterPage(),
+      home: HomePage(),
     );
   }
 }

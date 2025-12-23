@@ -1,5 +1,5 @@
 UNITY_INSTALLS_LOCATION ?= /Applications/Unity/Hub/Editor
-UNITY_VERSION = 6000.3.0f1
+UNITY_VERSION = 6000.3.2f1
 UNITY_EXE = $(UNITY_INSTALLS_LOCATION)/$(UNITY_VERSION)/Unity.app/Contents/MacOS/Unity
 
 setup:
